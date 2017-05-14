@@ -31,3 +31,4 @@
 *.dep
 webfsd
 Make.config
+.cvsignore

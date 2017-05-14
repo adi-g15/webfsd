@@ -61,7 +61,7 @@ struct REQUEST {
     struct sockaddr_storage peer;         /* client (log) */
     char        peerhost[MAX_HOST+1];
     char        peerserv[MAX_MISC+1];
-    
+
     /* request */
     char	hreq[MAX_HEADER+1];   /* request header */
     int 	lreq;		      /* request length */
@@ -83,7 +83,7 @@ struct REQUEST {
     off_t       *r_end;
     char        *r_head;
     int         *r_hlen;
-    
+
     /* response */
     int         status;              /* status code (log) */
     int         bc;                  /* byte counter (log) */
@@ -220,7 +220,7 @@ void write_request(struct REQUEST *req);
 /* --- ls.c ----------------------------------------------------- */
 
 void init_quote(void);
-char*  quote(unsigned char *path, int maxlength);
+char*  quote(char *path, int maxlength);
 struct DIRCACHE *get_dir(struct REQUEST *req, char *filename);
 void free_dir(struct DIRCACHE *dir);
 

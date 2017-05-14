@@ -79,7 +79,8 @@ cgi_request(struct REQUEST *req)
     struct strlist *env = NULL, *item;
     char host[65],serv[9];
     char filename[1024], *h, *argv[2], envname[128];
-    int pid,p[2],i,length;
+    int pid,p[2],i;
+    socklen_t length;
 
     if (debug)
 	fprintf(stderr,"%03d: is cgi request\n",req->fd);
@@ -115,7 +116,7 @@ cgi_request(struct REQUEST *req)
     getsockname(req->fd,(struct sockaddr*)&addr,&length);
     getnameinfo((struct sockaddr*)&addr,length,host,64,serv,8,
 		NI_NUMERICHOST | NI_NUMERICSERV);
-    
+
     /* setup file descriptors */
     dup2(p[1],1); /* pipe -> stdout */
     if (have_tty) {
@@ -221,7 +222,7 @@ cgi_read_header(struct REQUEST *req)
 	    if (next[-1] == '\r')
 		next[-1] = 0;
 	    next++;
-	    
+
 	    if (0 == strlen(h))
 		break;
 	    if (debug)

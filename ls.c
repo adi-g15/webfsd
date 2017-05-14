@@ -140,16 +140,16 @@ init_quote(void)
 }
 
 char*
-quote(unsigned char *path, int maxlength)
+quote(char *path, int maxlength)
 {
-    static unsigned char buf[2048]; /* FIXME: threads break this... */
-    int i,j,n=strlen(path);
+    static char buf[2048]; /* FIXME: threads break this... */
+    int i,j,n=strlen((char*)path);
 
     if (n > maxlength)
 	n = maxlength;
 
     for (i=0, j=0; i<n && j<sizeof(buf)-4; i++, j++) {
-	if (!do_quote[path[i]]) {
+	if (!do_quote[(unsigned char)path[i]]) {
 	    buf[j] = path[i];
 	    continue;
 	}

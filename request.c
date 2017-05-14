@@ -61,7 +61,7 @@ read_request(struct REQUEST *req, int pipelined)
 	mkerror(req,400,0);
 	return;
     }
-    
+
     /* header complete ?? */
     if (NULL != (h = strstr(req->hreq,"\r\n\r\n")) ||
 	NULL != (h = strstr(req->hreq,"\n\n"))) {
@@ -216,10 +216,10 @@ unhex(unsigned char c)
 
 /* handle %hex quoting, also split path / querystring */
 static void
-unquote(unsigned char *path, unsigned char *qs, unsigned char *src)
+unquote(char *path, char *qs, char *src)
 {
     int q;
-    unsigned char *dst;
+    char *dst;
 
     q=0;
     dst = path;
@@ -267,25 +267,25 @@ fixpath(char *path)
 }
 
 static int base64_table[] = {
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63, 
-    52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1, 
-    -1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 
-    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, 
-    -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 
-    41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1, 
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63,
+    52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1,
+    -1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
+    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1,
+    -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+    41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1,
 };
 
 static void
-decode_base64(unsigned char *dest, unsigned char *src, int maxlen)
+decode_base64(char *dest, char *src, int maxlen)
 {
     int a,b,d;
 
     for (a=0, b=0, d=0; *src != 0 && d < maxlen; src++) {
-	if (*src >= 128 || -1 == base64_table[*src])
+	if (*src < 0 || -1 == base64_table[(unsigned char)*src])
 	    break;
-	a = (a<<6) | base64_table[*src];
+	a = (a<<6) | base64_table[(unsigned char)*src];
 	b += 6;
 	if (b >= 8) {
 	    b -= 8;
@@ -298,7 +298,7 @@ decode_base64(unsigned char *dest, unsigned char *src, int maxlen)
 static int sanity_checks(struct REQUEST *req)
 {
     int i;
-		
+
     /* path: must start with a '/' */
     if (req->path[0] != '/') {
 	mkerror(req,400,0);
@@ -353,7 +353,7 @@ parse_request(struct REQUEST *req)
     char filename[MAX_PATH+1], proto[MAX_MISC+1], *h;
     int  port, rc, len;
     struct passwd *pw=NULL;
-    
+
     if (debug > 2)
 	fprintf(stderr,"%s\n",req->hreq);
 
@@ -439,7 +439,7 @@ parse_request(struct REQUEST *req)
 	    decode_base64(req->auth,h+21,sizeof(req->auth)-1);
 	    if (debug)
 		fprintf(stderr,"%03d: auth: %s\n",req->fd,req->auth);
-	    
+
 	} else if (0 == strncasecmp(h,"Range: bytes=",13)) {
 	    /* parsing must be done after fstat, we need the file size
 	       for the boundary checks */
@@ -542,7 +542,7 @@ parse_request(struct REQUEST *req)
 	    mkerror(req,403,1);
 	    return;
 	};
-	
+
 	if (-1 == stat(filename,&(req->bst))) {
 	    if (errno == EACCES) {
 		mkerror(req,403,1);

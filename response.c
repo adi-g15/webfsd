@@ -69,6 +69,20 @@ static ssize_t xsendfile(int out, int in, off_t offset, off_t off_bytes)
     }
     return nbytes;
 }
+#elif defined(__APPLE__) && !defined(NO_SENDFILE)
+
+static ssize_t xsendfile(int out, int in, off_t offset, off_t off_bytes)
+{
+    off_t bytes = off_to_size(off_bytes);
+
+    if (-1 == sendfile(in, out, offset, &bytes, NULL, 0)) {
+	if (errno == EAGAIN && bytes > 0)
+	    return bytes;
+	return -1;
+    }
+    return bytes;
+}
+
 #else
 
 # warning using slow sendfile() emulation.
@@ -415,7 +429,7 @@ void write_request(struct REQUEST *req)
 	    req->state = STATE_FINISHED;
 	    return;
 	case STATE_WRITE_FILE:
-	    rc = wrap_xsendfile(req, req->written, 
+	    rc = wrap_xsendfile(req, req->written,
 				req->bst.st_size - req->written);
 	    switch (rc) {
 	    case -1:
@@ -475,7 +489,7 @@ void write_request(struct REQUEST *req)
 	    }
 	    if (-1 != req->rb) {
 		/* write body */
-		rc = wrap_xsendfile(req, req->written, 
+		rc = wrap_xsendfile(req, req->written,
 				    req->r_end[req->rb] - req->written);
 		switch (rc) {
 		case -1:

@@ -189,7 +189,7 @@ fix_ug(void)
 {
     struct passwd  *pw = NULL;
     struct group   *gr = NULL;
-    
+
     /* root is allowed to use any uid/gid,
      * others will get their real uid/gid */
     if (0 == getuid() && strlen(user) > 0) {
@@ -359,7 +359,7 @@ xerror(int loglevel, char *txt, char *peerhost)
 	    syslog(loglevel,"%s\n",txt);
 	else
 	    syslog(loglevel,"%s (peer=%s)\n",txt,peerhost);
-    }	
+    }
 }
 
 /* ---------------------------------------------------------------------- */
@@ -373,7 +373,8 @@ mainloop(void *thread_arg)
 
     struct REQUEST      *req,*prev,*tmp;
     struct timeval      tv;
-    int                 max,length;
+    int                 max;
+    socklen_t           length;
     fd_set              rd,wr;
 
     for (;!termsig;) {
@@ -698,7 +699,7 @@ main(int argc, char *argv[])
 	if (res->ai_canonname)
 	    strcpy(server_host,res->ai_canonname);
     }
-    
+
     /* parse options */
     for (;;) {
 	if (-1 == (c = getopt(argc,argv,"hvsdF46jS"
@@ -841,7 +842,7 @@ main(int argc, char *argv[])
 		xperror(LOG_ERR,"socket (ipv6)",NULL);
 	}
     }
-	
+
     /* ... failing that try ipv4 */
     if (-1 == slisten  &&  v4) {
 	ask.ai_family = PF_INET;
@@ -999,7 +1000,7 @@ main(int argc, char *argv[])
     }
 #endif
     mainloop(NULL);
-    
+
 #ifdef USE_SSL
     if (with_ssl)
 	SSL_CTX_free(ctx);
