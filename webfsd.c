@@ -37,6 +37,7 @@ int     max_dircache   = 128;
 char    *doc_root      = ".";
 char    *indexhtml     = NULL;
 char    *cgipath       = NULL;
+char    *exclude_file  = NULL;
 char    *listen_ip     = NULL;
 char    *listen_port   = "8000";
 int     virtualhosts   = 0;
@@ -120,6 +121,7 @@ usage(char *name)
 	    "  -r dir   document root is >dir<              [%s]\n"
 	    "  -R dir   same as above + chroot to >dir<\n"
 	    "  -f file  look for >file< as directory index  [%s]\n"
+      "  -E file   exclude >file< from serving        [%s]\n"
 	    "  -n host  server hostname is >host<           [%s]\n"
 	    "  -N host  same as above + UseCanonicalName\n"
 	    "  -i ip    bind to IP-address >ip<             [%s]\n"
@@ -152,6 +154,7 @@ usage(char *name)
 #endif
 	    listen_port, doc_root,
 	    indexhtml ? indexhtml : "none",
+      exclude_file ? exclude_file : "none",
 	    server_host,
 	    listen_ip ? listen_ip : "any",
 	    virtualhosts ? "on" : "off",
@@ -703,7 +706,7 @@ main(int argc, char *argv[])
     /* parse options */
     for (;;) {
 	if (-1 == (c = getopt(argc,argv,"hvsdF46jS"
-			      "r:R:f:p:n:N:i:t:c:a:u:g:l:L:m:y:b:k:e:x:C:P:~:")))
+			      "r:R:f:p:n:N:i:t:c:a:u:g:l:L:E:m:y:b:k:e:x:C:P:~:")))
 	    break;
 	switch (c) {
 	case 'h':
@@ -784,13 +787,24 @@ main(int argc, char *argv[])
 	case 'e':
 	    lifespan = atoi(optarg);
 	    break;
+  case 'E':
+      printf("E\n");
+
+      break;
 	case 'x':
-	    if (optarg[strlen(optarg)-1] == '/') {
-		cgipath = optarg;
-	    } else {
+	    if (optarg[strlen(optarg)-1] != '/' && optarg[0] != '/') {
+		cgipath = malloc(strlen(optarg)+3);
+		sprintf(cgipath,"/%s/",optarg);
+      } else if (optarg[strlen(optarg)-1] != '/') {
 		cgipath = malloc(strlen(optarg)+2);
 		sprintf(cgipath,"%s/",optarg);
+      } else if (optarg[0] != '/') {
+		cgipath = malloc(strlen(optarg)+2);
+		sprintf(cgipath,"/%s",optarg);
+      } else {
+		cgipath = optarg;
 	    }
+
 	    break;
 #ifdef USE_THREADS
 	case 'y':
