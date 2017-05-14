@@ -159,6 +159,7 @@ extern int    virtualhosts;
 extern int    canonicalhost;
 extern int    do_chroot;
 extern char   *server_name;
+extern char*  exclude_file;
 extern char   *indexhtml;
 extern char   *cgipath;
 extern char   *doc_root;
@@ -228,6 +229,7 @@ void free_dir(struct DIRCACHE *dir);
 
 char* get_mime(char *file);
 void  init_mime(char *file, char *def);
+int  is_excluded(char *file);
 
 /* --- cgi.c ---------------------------------------------------- */
 

@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#include <fnmatch.h>
 #include <errno.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -21,6 +22,47 @@ static struct MIME  *mime_types;
 static int           mime_count;
 
 /* ----------------------------------------------------------------- */
+
+int is_excluded(char* file) {
+  char* pt;
+  char* fn = strdup(file);
+  char* ofn = fn;
+
+  if (strchr(fn, '/')) {
+    while (fn[0] != '/') fn++;
+    while (fn[1] == '/') fn++;
+    fn++;
+  }
+  while (fn[strlen(fn)-1] == '/') {
+    fn[strlen(fn)-1] = '\0';
+  }
+
+  char* p = fn;
+  while ((p = strchr(p, '/'))) {
+    char* ff = strndup(fn, p - fn);
+    if (is_excluded(ff)) {
+      free(ofn);
+      free(ff);
+      return 1;
+    }
+    free(ff);
+    p++;
+  }
+
+  char* ef = strdup(exclude_file);
+  char* oef = ef;
+  int match = 0;
+  while ((pt = strsep(&ef, ","))) {
+    if (fnmatch(pt, fn, 0) == 0) {
+      match = 1;
+      break;
+    }
+  }
+  free(oef);
+  free(ofn);
+  return match;
+}
+
 
 static void
 add_mime(char *ext, char *type)

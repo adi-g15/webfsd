@@ -231,8 +231,8 @@ ls(time_t now, char *hostname, char *filename, char *path, int *length)
 	if (NULL == files[count])
 	    goto oom;
 	strcpy(files[count]->n,file->d_name);
-	sprintf(line,"%s/%s",filename,file->d_name);
-	if (-1 == stat(line,&files[count]->s)) {
+	sprintf(line,"%s%s",filename,file->d_name);
+	if (-1 == stat(line,&files[count]->s) || is_excluded(line)) {
 	    free(files[count]);
 	    count--;
 	    continue;

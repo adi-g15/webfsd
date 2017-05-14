@@ -391,6 +391,10 @@ parse_request(struct REQUEST *req)
 
     unquote(req->path,req->query,req->uri);
     fixpath(req->path);
+    if (is_excluded(req->path)) {
+      mkerror(req, 404, 1);
+      return;
+    }
     if (debug)
 	fprintf(stderr,"%03d: %s \"%s\" HTTP/%d.%d\n",
 		req->fd, req->type, req->path, req->major, req->minor);

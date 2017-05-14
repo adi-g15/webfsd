@@ -121,7 +121,7 @@ usage(char *name)
 	    "  -r dir   document root is >dir<              [%s]\n"
 	    "  -R dir   same as above + chroot to >dir<\n"
 	    "  -f file  look for >file< as directory index  [%s]\n"
-      "  -E file   exclude >file< from serving        [%s]\n"
+      "  -E file  exclude >file< from serving         [%s]\n"
 	    "  -n host  server hostname is >host<           [%s]\n"
 	    "  -N host  same as above + UseCanonicalName\n"
 	    "  -i ip    bind to IP-address >ip<             [%s]\n"
@@ -788,8 +788,13 @@ main(int argc, char *argv[])
 	    lifespan = atoi(optarg);
 	    break;
   case 'E':
-      printf("E\n");
-
+      if (exclude_file == NULL) {
+        exclude_file = malloc(strlen(optarg) + 1);
+        strcpy(exclude_file, optarg);
+      } else {
+        exclude_file = realloc(exclude_file, strlen(exclude_file) + strlen(optarg) + 2);
+        sprintf(exclude_file, "%s,%s", exclude_file, optarg);
+      }
       break;
 	case 'x':
 	    if (optarg[strlen(optarg)-1] != '/' && optarg[0] != '/') {
