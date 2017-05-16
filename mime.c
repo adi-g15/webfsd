@@ -28,6 +28,10 @@ int is_excluded(char* file) {
   char* fn = strdup(file);
   char* ofn = fn;
 
+  if (!exclude_file) {
+    return 0;
+  }
+
   if (strchr(fn, '/')) {
     while (fn[0] != '/') fn++;
     while (fn[1] == '/') fn++;
