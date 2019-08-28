@@ -185,6 +185,7 @@ static struct HTTP_STATUS {
 	"HTTP/1.1 %s\r\n"		\
 	"Server: %s\r\n"		\
 	"Connection: %s\r\n"		\
+  "Access-Control-Allow-Origin: *\r\n" \
 	"Accept-Ranges: bytes\r\n"
 #define BOUNDARY			\
 	"XXX_CUT_HERE_%ld_XXX"
