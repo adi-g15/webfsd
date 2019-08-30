@@ -91,7 +91,7 @@ static int password_cb(char *buf, int num, int rwflag, void *userdata)
 	return 0;
     if (num < strlen(password)+1)
 	return 0;
-    
+
     strcpy(buf,password);
     return(strlen(buf));
 }
@@ -103,7 +103,7 @@ void init_ssl(void)
     OpenSSL_add_all_algorithms();
     SSL_load_error_strings();
     SSL_library_init();
-    ctx = SSL_CTX_new(SSLv23_server_method());
+    ctx = SSL_CTX_new(TLS_server_method());
     if (NULL == ctx) {
         fprintf(stderr, "SSL init error [%s]",strerror(errno));
 	exit (1);
@@ -122,7 +122,7 @@ void init_ssl(void)
     }
 
     SSL_CTX_set_default_passwd_cb(ctx, password_cb);
-    SSL_CTX_use_PrivateKey_file(ctx, certificate, SSL_FILETYPE_PEM);
+    rc = SSL_CTX_use_PrivateKey_file(ctx, password, SSL_FILETYPE_PEM);
     switch (rc) {
     case 1:
 	if (debug)
@@ -132,6 +132,13 @@ void init_ssl(void)
 	fprintf(stderr, "SSL privkey load error [%s]\n",
 		ERR_error_string(ERR_get_error(), NULL));
 	break;
+    }
+
+    rc = SSL_CTX_check_private_key(ctx);
+    if (rc != 1) {
+        fprintf(stderr, "SSL no check priv key\n");
+    } else if (debug) {
+        fprintf(stderr, "SSL priv key check ok\n");
     }
 
     SSL_CTX_set_options(ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2);
