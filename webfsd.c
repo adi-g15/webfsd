@@ -34,6 +34,7 @@ int     timeout        = 60;
 int     keepalive_time = 5;
 int     tcp_port       = 0;
 int     max_dircache   = 128;
+char    *cors          = NULL;
 char    *doc_root      = ".";
 char    *indexhtml     = NULL;
 char    *cgipath       = NULL;
@@ -112,6 +113,7 @@ usage(char *name)
 	    "  -s       enable syslog (start/stop/errors)   [%s]\n"
 	    "  -t sec   set network timeout                 [%i]\n"
 	    "  -c n     set max. allowed connections        [%i]\n"
+	    "  -O CORS  set CORS header                     [%s]\n"
 	    "  -a n     set max. cached dirs                [%i]\n"
 	    "  -j       disable directory listings          [%s]\n"
 #ifdef USE_THREADS
@@ -147,7 +149,9 @@ usage(char *name)
  	    debug     ?  "on" : "off",
  	    dontdetach ?  "on" : "off",
 	    usesyslog ?  "on" : "off",
-	    timeout, max_conn, max_dircache,
+	    timeout, max_conn,
+	    cors ? cors : "none",
+	    max_dircache,
 	    no_listing ? "on" : "off",
 #ifdef USE_THREADS
 	    nthreads,
@@ -460,6 +464,7 @@ mainloop(void *thread_arg)
 		} else {
 		    close_on_exec(req->fd);
 		    fcntl(req->fd,F_SETFL,O_NONBLOCK);
+		    req->cors = cors;
 		    req->bfd = -1;
 		    req->cgipipe = -1;
 		    req->state = STATE_READ_HEADER;
@@ -706,7 +711,7 @@ main(int argc, char *argv[])
     /* parse options */
     for (;;) {
 	if (-1 == (c = getopt(argc,argv,"hvsdF46jS"
-			      "r:R:f:p:n:N:i:t:c:a:u:g:l:L:E:m:y:b:k:e:x:C:P:~:")))
+			      "O:r:R:f:p:n:N:i:t:c:a:u:g:l:L:m:y:b:k:e:x:C:P:~:")))
 	    break;
 	switch (c) {
 	case 'h':
@@ -747,6 +752,9 @@ main(int argc, char *argv[])
 	case 'n':
 	    strncpy(server_host,optarg,64);
 	    break;
+	case 'O':
+		cors = optarg;
+		break;
 	case 'i':
 	    listen_ip = optarg;
 	    break;

@@ -190,6 +190,18 @@ static struct HTTP_STATUS {
 #define BOUNDARY			\
 	"XXX_CUT_HERE_%ld_XXX"
 
+static void
+mkcors(struct REQUEST *req) {
+    if (NULL != req->cors) {
+        req->lres += sprintf(req->hres+req->lres,
+                     "Access-Control-Allow-Origin: %s\r\n",
+                     req->cors);
+        if(debug)
+        	fprintf(stderr, "%03d: CORS added: CORS=%s\n",
+        		req->fd, req->cors);
+    }
+
+}
 void
 mkerror(struct REQUEST *req, int status, int ka)
 {
@@ -212,6 +224,7 @@ mkerror(struct REQUEST *req, int status, int ka)
     if (401 == status)
 	req->lres += sprintf(req->hres+req->lres,
 			     "WWW-Authenticate: Basic realm=\"webfs\"\r\n");
+    mkcors(req);
     req->lres += strftime(req->hres+req->lres,80,
 			  "Date: " RFC1123 "\r\n\r\n",
 			  gmtime(&now));
@@ -236,6 +249,7 @@ mkredirect(struct REQUEST *req)
 			req->keep_alive ? "Keep-Alive" : "Close",
 			req->hostname,tcp_port,quote(req->path,9999),
 			(int64_t)req->lbody);
+    mkcors(req);
     req->lres += strftime(req->hres+req->lres,80,
 			  "Date: " RFC1123 "\r\n\r\n",
 			  gmtime(&now));
@@ -324,6 +338,7 @@ mkheader(struct REQUEST *req, int status)
 				  gmtime(&expires));
 	}
     }
+    mkcors(req);
     req->lres += strftime(req->hres+req->lres,80,
 			  "Date: " RFC1123 "\r\n\r\n",
 			  gmtime(&now));
@@ -346,6 +361,7 @@ mkcgi(struct REQUEST *req, char *status, struct strlist *header)
     req->lres += strftime(req->hres+req->lres,80,
 			  "Date: " RFC1123 "\r\n\r\n",
 			  gmtime(&now));
+    mkcors(req);
     req->state = STATE_WRITE_HEADER;
 }
 
