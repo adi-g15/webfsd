@@ -372,7 +372,7 @@ ls(time_t now, char *hostname, char *filename, char *path, int *length)
     strftime(line,32,"%d/%b/%Y %H:%M:%S GMT",gmtime(&now));
     len += sprintf(buf+len,
 		   "</pre><hr noshade size=1>\n"
-		   "<small><a href=\"%s\">%s</a> &nbsp; %s</small>\n"
+		   "<small>Hosted on Aditya's Lappy, powered by <a href=\"%s\">%s</a> &nbsp; %s</small>\n"
 		   "</body>\n",
 		   HOMEPAGE,server_name,line);
     for (i = 0; i < count; i++)
